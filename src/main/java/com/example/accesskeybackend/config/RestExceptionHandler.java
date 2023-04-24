@@ -3,6 +3,8 @@ package com.example.accesskeybackend.config;
 import com.example.accesskeybackend.exception.AlreadyActivatedException;
 import com.example.accesskeybackend.exception.IllegalArgumentException;
 import com.example.accesskeybackend.exception.NotFoundException;
+import com.example.accesskeybackend.exception.ValidateSiteDomainException;
+import com.example.accesskeybackend.template.dto.ExceptionResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.log4j.Log4j2;
@@ -16,9 +18,6 @@ import java.util.List;
 @Log4j2
 @RestControllerAdvice
 public class RestExceptionHandler {
-
-    private record ExceptionResponse(List<String> errors) {
-    }
 
     @ExceptionHandler(value = IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -47,6 +46,11 @@ public class RestExceptionHandler {
         return new ExceptionResponse(exceptions);
     }
 
+    @ExceptionHandler(value = ValidateSiteDomainException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ExceptionResponse validateSiteDomainException(final ValidateSiteDomainException ex) {
+        return new ExceptionResponse(List.of(ex.getMessage()));
+    }
 
     private static <T> String getValidationMessage(final ConstraintViolation<T> violation) {
         final String className = violation.getRootBeanClass().getSimpleName();
